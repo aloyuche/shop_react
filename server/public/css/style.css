@@ -1,0 +1,22 @@
+.container {
+  margin: 0 20px 0 20px;
+  justify-content: center;
+  align-items: center;
+}
+.form-data {
+  padding: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: aliceblue;
+  box-shadow: 1px #ccc;
+}
+.form-control {
+  width: 90%;
+  align-items: center;
+  padding: 15px;
+  border-radius: 6px;
+}
+button {
+  color: white;
+  font-size: 1.5em;
+}
