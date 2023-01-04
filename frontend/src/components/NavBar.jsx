@@ -1,81 +1,83 @@
+import { motion } from "framer-motion";
+import React from "react";
+import { app } from "../firebase.config";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+
+import { TiShoppingCart } from "react-icons/ti";
+import Avatar from "../images/ava2.png";
+
 import { Link } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import styled from "styled-components";
-import { logoutUser } from "../slice/authSlice";
-import { toast } from "react-toastify";
+import { useStateValue } from "../context/StateProvider";
+import { actionType } from "../context/reducer";
+
+// import Logo from "https://res.cloudinary.com/cheloytec/image/upload/v1669305398/online-shop/MyLogo.png";
 
 const NavBar = () => {
-  const dispatch = useDispatch();
-  const { cartTotalQuantity } = useSelector((state) => state.cart);
-  const auth = useSelector((state) => state.auth);
+  const firebaseAuth = getAuth(app);
+  const provider = new GoogleAuthProvider();
 
-  console.log(auth);
+  const [{ user }, dispatch] = useStateValue();
 
+  const login = async () => {
+    const {
+      user: { refreshToken, providerData },
+    } = await signInWithPopup(firebaseAuth, provider);
+    dispatch({
+      type: actionType.SET_USER,
+      user: providerData[0],
+    });
+  };
   return (
-    <nav className="nav-bar">
-      <Link to="/">
-        <h2>OnlineShop</h2>
-      </Link>
-      <Link to="/cart">
-        <div className="nav-bag">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="35"
-            height="35"
-            fill="currentColor"
-            className="bi bi-handbag-fill"
-            viewBox="0 0 16 16"
-          >
-            <path d="M8 1a2 2 0 0 0-2 2v2H5V3a3 3 0 1 1 6 0v2h-1V3a2 2 0 0 0-2-2zM5 5H3.36a1.5 1.5 0 0 0-1.483 1.277L.85 13.13A2.5 2.5 0 0 0 3.322 16h9.355a2.5 2.5 0 0 0 2.473-2.87l-1.028-6.853A1.5 1.5 0 0 0 12.64 5H11v1.5a.5.5 0 0 1-1 0V5H6v1.5a.5.5 0 0 1-1 0V5z" />
-          </svg>
-          <span className="bag-quantity">
-            <span>{cartTotalQuantity}</span>
-          </span>
-        </div>
-      </Link>
-      {auth._id ? (
-        <Links>
-          {auth.isAdmin ? (
-            <div>
-              <Link to="/admin/summary">Admin</Link>
+    <div className="fixed z-50 w-screen p-6 px-16 bg-gradient-to-r from-purple-50 to-blue-50 text-center text-gray-900">
+      {/* //Tablet */}
+      <div className="hidden md:flex w-full h-full justify-between">
+        <Link to={"/"} className="flex items-center gap-2">
+          <img
+            src="https://res.cloudinary.com/cheloytec/image/upload/v1669305398/online-shop/MyLogo.png"
+            alt="LOGO"
+            className="w-10 object-cover"
+          />
+          <p className="text-headingColor text-2xl font-bold">CheloyTec</p>
+        </Link>
+        <div className="flex gap-6 cursor-pointer">
+          <ul className="flex gap-10 p-6">
+            <li className="text-base text-textColor hover:text-headingColor duration-100 transition-all ease-in-out cursor-pointer capitalize">
+              Home
+            </li>
+            <li className="text-base text-textColor hover:text-headingColor duration-100 transition-all ease-in-out cursor-pointer capitalize">
+              Menu
+            </li>
+            <li className="text-base text-textColor hover:text-headingColor duration-100 transition-all ease-in-out cursor-pointer capitalize">
+              About Us
+            </li>
+            <li className="text-base text-textColor hover:text-headingColor duration-100 transition-all ease-in-out cursor-pointer capitalize">
+              Contacts
+            </li>
+            <li className="text-base text-textColor hover:text-headingColor duration-100 transition-all ease-in-out cursor-pointer capitalize">
+              Service
+            </li>
+          </ul>
+          <div className="relative flex justify-center items-center">
+            <TiShoppingCart className="text-textColor text-2xl" />
+            <div className="absolute top-2 -right-2 flex w-5 h-5 rounded-full bg-red-600 justify-center items-center ">
+              <p className="text-sm text-white">2</p>
             </div>
-          ) : null}
-          <div
-            onClick={() => {
-              dispatch(logoutUser(null));
-              toast.warning("Logged out!", { position: "bottom-left" });
-            }}
-          >
-            Logout
           </div>
-        </Links>
-      ) : (
-        <AuthLinks>
-          <Link to="/login">Login</Link>
-          <Link to="register">Register</Link>
-        </AuthLinks>
-      )}
-    </nav>
+          <div className="relative">
+            <motion.img
+              whileTap={{ scale: 0.6 }}
+              src={user ? user.photoURL : Avatar}
+              className="w-5 min-w-[40px] h-5 min-h-[40px] drop-shadow-2xl rounded-full bg-slate-300"
+              alt="AvatarImg"
+              onClick={login}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex md:hidden w-full h-full"></div>
+    </div>
   );
 };
 
 export default NavBar;
-
-const AuthLinks = styled.div`
-  a {
-    &:last-child {
-      margin-left: 2rem;
-    }
-  }
-`;
-
-const Links = styled.div`
-  color: white;
-  display: flex;
-  div {
-    cursor: pointer;
-    &:last-child {
-      margin-left: 2rem;
-    }
-  }
-`;
